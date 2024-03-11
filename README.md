@@ -67,6 +67,7 @@ python  -m cganMNIST --epochs=200 --optimizer=adam
 ## Make the gif
 
 There is a gif maker script in the root of the project.
+
 ```bash
 ./ gif.sh ./output/20240311-144708/images.txt
 ```
@@ -81,7 +82,7 @@ There is a gif maker script in the root of the project.
 
 ## reference
 
-The source code for the juytpter notebook
+The original source code for the Jupyter notebook
 
 - Author: Amir Hossein Fouladi
 - [Original Repository](https://github.com/Amir-Hofo/CGAN_MNIST_Pytorch/tree/main)
