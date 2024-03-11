@@ -1,0 +1,16 @@
+base_dir: output
+checkpoint_interval: 100
+config: null
+created: '2024-03-11T14:47:08.125885'
+dis_lr: 0.0002
+dis_model_path: null
+epochs: 200
+gen_lr: 0.0002
+gen_model_path: null
+image_dir: output/20240311-144708/images
+log_file: output/20240311-144708/log.txt
+model_dir: output/20240311-144708/models
+optimizer: adam
+output_dir: output/20240311-144708
+save_checkpoints: false
+updated: '2024-03-11T14:47:08.126080'
