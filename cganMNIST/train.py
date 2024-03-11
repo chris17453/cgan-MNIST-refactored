@@ -310,6 +310,7 @@ class cgan:
             # log metrics
             self.log_metrics(epoch,results['d_loss'], results['g_loss'])
             self.save_training_image(epoch, self.config.epochs)
+        self.running=False
 
     def start(self):
         work_thread = threading.Thread(target=self.train)

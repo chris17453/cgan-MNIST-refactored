@@ -62,11 +62,12 @@ def main():
     t_thread=trainer.start()
     print("Press Ctrl+S to save, Ctrl+X to exit, or any other key to continue.")
     while True:
+         
         char = getch()
         if char == '\x13':  # Ctrl+S
             print("Save Requested")
             trainer.queue_save()
-        elif char == '\x18' or char =='\x03':  # Ctrl+X
+        elif char == '\x18' or char =='\x03' or trainer.running==False:  # Ctrl+X
             print("Exiting")
             trainer.stop()
             t_thread.join()

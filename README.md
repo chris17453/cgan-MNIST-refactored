@@ -75,6 +75,10 @@ There is a gif maker script in the root of the project.
 
 ![Compiled Output](assets/output.gif)
 
+## Cli action
+
+![CLI](assets/cli.gif)
+
 ## reference
 
 The source code for the juytpter notebook

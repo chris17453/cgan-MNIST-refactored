@@ -1,0 +1,18 @@
+Height: 28
+Width: 28
+Neuron: 256
+Training Configuration:
+  Output Directory:         output/20240311-154526
+  Model Directory:          output/20240311-154526/models
+  Image Directory:          output/20240311-154526/images
+  Save Checkpoints:         No
+  Optimizer:                adam
+  Gen LR:                   0.0002
+  Dis LR:                   0.0002
+  Epochs:                   200
+Epoch: 0, D Loss: 0.3165, G Loss: 16.8752
+Epoch: 1, D Loss: 1.2111, G Loss: 5.2614
+Epoch: 2, D Loss: 0.6321, G Loss: 4.4088
+Saving Checkpopint
+Saving epoch 2 Checkpoint: output/20240311-154526/models/cgan_epoch_2.pth
+Epoch: 3, D Loss: 0.3729, G Loss: 3.9706
