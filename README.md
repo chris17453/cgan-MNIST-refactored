@@ -65,7 +65,7 @@ python  -m cganMNIST --epochs=200 --optimizer=adam
 
 ## Timelapse
 
-![Compiled Output](assets/compiled.gif)
+![Compiled Output](assets/output.gif)
 
 ## reference
 

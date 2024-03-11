@@ -1,3 +1,4 @@
 .vscode*
 *.lock
 __pycache__
+*/annotated_images*
