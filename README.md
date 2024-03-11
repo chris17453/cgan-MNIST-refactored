@@ -17,6 +17,7 @@ This project aims to showcase the transformation of a Jupyter notebook into an e
 - added configurable learning rates for generator and discriminator
 - added different optimisers (still working on that)
 - snazzy TAAG AScii art for the CLI!
+- handy gif maker
 
 ## Thoughts
 
@@ -61,6 +62,13 @@ options:
 
 python  -m cganMNIST --epochs=200 --optimizer=adam
 
+```
+
+## Make the gif
+
+There is a gif maker script in the root of the project.
+```bash
+./ gif.sh ./output/20240311-144708/images.txt
 ```
 
 ## Timelapse

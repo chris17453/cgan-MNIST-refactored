@@ -1,5 +1,5 @@
 #!/bin/bash
-files=./output/20240311-144708/images.txt
+files="$1"
 base_dir=$(dirname "$files")
 
 # Check if files.txt exists
