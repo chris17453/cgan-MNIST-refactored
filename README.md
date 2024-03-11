@@ -21,7 +21,7 @@ This project aims to showcase the transformation of a Jupyter notebook into an e
 
 ## Thoughts
 
-After about 100 iterations, loss just loopps for both models.. so I dont see a need for 800 iterations.
+After about 100 iterations, loss just loops for both models.. so I dont see a need for 800 iterations.
 I would love to get this working better, please give feedback.
 
 ## Install
