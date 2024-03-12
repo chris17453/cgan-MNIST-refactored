@@ -1,23 +1,26 @@
 # CGAN_MNIST
 
-This is a weekend project. I saw some great code by Amir Hossein Fouladi, and I thought to refgine it for command line usage. As an example project of how I normaly woprk with data scientists.  I'ce cleaned it up, and added a lot of shine.. but the core code was derrived from Amir's work. Thank you Amir!
+I embarked on this project over the weekend, inspired by the remarkable code shared by Amir Hossein Fouladi. My goal was to adapt it for command line application, showcasing a typical example of my collaboration with data scientists. I've refined and enhanced it significantly, yet the foundational code is a testament to Amir's original work. My sincere thanks to Amir!
 
 This code exemplifies a CGAN deep learning model using PyTorch, short for Conditional Generative Adversarial Net. CGAN networks determine the class of generated images. The architecture comprises Multi-Layer Perceptron (MLP) networks for both generator and discriminator. Trained on the MNIST dataset, the model can generate images representing numbers 0 to 9 based on specified labels.
 
 This project aims to showcase the transformation of a Jupyter notebook into an enjoyable commandline utility. Enhancements include:
 
-- Integration of a command line utility
-- Model saving functionality
-- Loading models and resuming checkpoints
-- Individual model directories
-- Saving images per epoch
-- Logging epochs and training progress
-- Configuration files documenting each run
-- Progress bar for tracking process status.
-- added configurable learning rates for generator and discriminator
-- added different optimisers (still working on that)
-- snazzy TAAG AScii art for the CLI!
-- handy gif maker
+## Features
+
+- **Command Line Utility Integration**: A seamless command line interface for easy access and control.
+- **Model Persistence**: Functionality to save models for future use.
+- **Checkpoint Resumption**: Ability to load models and resume from checkpoints.
+- **Organized Model Directories**: Each model has its own dedicated directory.
+- **Epoch Image Saving**: Saves images after each epoch for visual progress tracking.
+- **Training Progress Logging**: Detailed logging of epochs and training metrics.
+- **Configurable Runs**: Use configuration files to document and customize each run.
+- **Progress Bar**: A visual progress bar to monitor process status.
+- **Configurable Learning Rates**: Configurable learning rates for both the generator and discriminator to optimize training.
+- **Multiple Optimizers**: Integration of different optimizers to enhance model performance (ongoing development).
+- **CLI Ascii Art**: Snazzy TAAG Ascii art for an enhanced command line interface experience.
+- **GIF Generation**: Handy tool for creating GIFs to visualize training progression.
+aker
 
 ## Thoughts
 
