@@ -8,6 +8,7 @@ This project aims to showcase the transformation of a Jupyter notebook into an e
 
 ## Features
 
+- **MNIST/EMNIST**: Build on MNIST or EMNIST (numeric (10 classes) or alpha numeric (62 classes))
 - **Command Line Utility Integration**: A seamless command line interface for easy access and control.
 - **Model Persistence**: Functionality to save models for future use.
 - **Checkpoint Resumption**: Ability to load models and resume from checkpoints.
