@@ -16,20 +16,23 @@ help:
 	@echo "  clean    : Remove Python file artifacts and the virtual environment."
 
 
-train-adam:
 #optimizer= 'adam', 'rmsprop', 'sgd'
-	$(PYTHON) -m cganMNIST --epochs=200 --optimizer=adam
+#	$(PYTHON) -m cganMNIST --epochs=200 --optimizer=adam --output-dir=adam-``
 #	--gen_model_path=models/generator_epoch_100.pth --dis_model_path=models/discriminator_epoch_100.pth 
+
+train-adam:
+	output_dir=$$(date +'%y%m%d-%H%M%S'); \
+	$(PYTHON) -m cganMNIST --workers=16 --batch=1000 --epochs=200 --dis-lr=0.0004 --gen-lr=.0002 --optimizer=adam --output-dir="outputs/adam-$$output_dir"
 
 train-rmsprop:
 #optimizer= 'adam', 'rmsprop', 'sgd'
-	$(PYTHON) -m cganMNIST --epochs=200 --optimizer=rmsprop --gen_lr=0.0004 --dis_lr=0.0001
+	$(PYTHON) -m cganMNIST --epochs=200 --optimizer=rmsprop --gen_lr=.0004 --dis_lr=0.0001
 #	--gen_model_path=models/generator_epoch_100.pth --dis_model_path=models/discriminator_epoch_100.pth 
 
 
 train-sgd:
 #optimizer= 'adam', 'rmsprop', 'sgd'
-	$(PYTHON) -m cganMNIST --epochs=200 --optimizer=sgd --gen_lr=0.0001 --dis_lr=0.0004
+	$(PYTHON) -m cganMNIST --epochs=200 --optimizer=sgd --gen_lr=0.0001 --dis_lr=.0004
 #	--gen_model_path=models/generator_epoch_100.pth --dis_model_path=models/discriminator_epoch_100.pth 
 
 train-100:

@@ -2,4 +2,9 @@
 *.lock
 __pycache__
 */annotated_images*
-output/
+output/*
+outputs/*
+MINST
+EMNIST
+*.PNG
+*.png

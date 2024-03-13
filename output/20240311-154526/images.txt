@@ -1,4 +1,0 @@
-output/20240311-154526/images/img_0.png
-output/20240311-154526/images/img_1.png
-output/20240311-154526/images/img_2.png
-output/20240311-154526/images/img_3.png

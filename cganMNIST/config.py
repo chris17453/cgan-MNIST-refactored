@@ -22,6 +22,8 @@ class ConfigManager:
         self.gen_model_path = None
         self.dis_model_path = None
         self.log_file = None
+        self.workers = 4
+        self.batch_size = 100
 
         # load the params into the config variable...
         for key, value in parameters.items():
