@@ -86,6 +86,9 @@ There is a gif maker script in the root of the project.
 
 ![Compiled Output](assets/emnist-output2.gif)
 
+## Sample data
+
+![EMNIST ](assets/emnist-sample.png)
 
 ## Cli action
 

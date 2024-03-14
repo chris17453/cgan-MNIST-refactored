@@ -22,7 +22,7 @@ help:
 
 minst-adam:
 	output_dir=$$(date +'%y%m%d-%H%M%S'); \
-	$(PYTHON) -m glyphix --model=MNIST --workers=4 --batch=1000 --epochs=800 --dis-lr=0.0005 --gen-lr=.0005 --optimizer=adam --output-dir="outputs/adam-$$output_dir"
+	$(PYTHON) -m glyphix --model=MNIST --workers=4 --batch=1000 --epochs=800 --dis-lr=.0001 --gen-lr=.0004 --optimizer=adam --output-dir="outputs/adam-$$output_dir"
 
 
 eminst-adam:

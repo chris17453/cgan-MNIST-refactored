@@ -17,6 +17,9 @@ class glyphix:
         self.running = True
         self.save_requested = False
         self.start_epoch = 0
+        self.loss_history=[]
+        self.epochs_since_dis_adjustment = 0
+        self.epochs_since_gen_adjustment = 0        
 
         self.config=ConfigManager(kwargs)
         self.config.load_or_save()
@@ -64,7 +67,48 @@ class glyphix:
             self.logger.log(f"  Starting Epoch:           {self.start_epoch}")
             
         self.logger.log(f"  Epochs:                   {self.config.epochs}")
+
+    # Check if loss flatlines
+    def loss_flatlined(self):
+        if len(self.loss_history) >= 10:  # Check last 10 epochs
+            # Only check for flatline if enough epochs have passed since last adjustment
+            check_d_loss = self.epochs_since_dis_adjustment >= 10
+            check_g_loss = self.epochs_since_gen_adjustment >= 10
+
+            recent_d_losses = [item['d_loss'] for item in self.loss_history[-10:]]
+            recent_g_losses = [item['g_loss'] for item in self.loss_history[-10:]]
+
+            d_loss_slope = sum([recent_d_losses[i+1] - recent_d_losses[i] for i in range(len(recent_d_losses)-1)]) / len(recent_d_losses)
+            g_loss_slope = sum([recent_g_losses[i+1] - recent_g_losses[i] for i in range(len(recent_g_losses)-1)]) / len(recent_g_losses)
+
+            d_loss_flatlined = abs(d_loss_slope) < 0.001 and check_d_loss
+            g_loss_flatlined = abs(g_loss_slope) < 0.001 and check_g_loss
+
+            self.logger.log(f"SLOPE DIS:{d_loss_slope}, GEN:{g_loss_slope} , FLATLINED DIS:{d_loss_flatlined}, GEN:{g_loss_flatlined}")
+
+            return {'dis_loss': d_loss_flatlined, 'gen_loss': g_loss_flatlined}
+        return False
     
+    # Function to adjust learning rate
+    def adjust_learning_rate(self, loss):
+        if loss['dis_loss']:
+            self.config.dis_lr = self.config.dis_lr * 0.5
+            self.model.optimizer_dis.param_groups[0]['lr'] = self.config.dis_lr
+            self.logger.log(f"Adjusting DIS_LOSS {self.config.dis_lr}")
+            self.epochs_since_dis_adjustment = 0  # Reset counter
+        else:
+            self.epochs_since_dis_adjustment += 1  # Increment counter
+
+        if loss['gen_loss']:
+            self.config.gen_lr = self.config.gen_lr * 0.5
+            self.model.optimizer_gen.param_groups[0]['lr'] = self.config.gen_lr
+            self.logger.log(f"Adjusting GEN_LOSS {self.config.gen_lr}")
+            self.epochs_since_gen_adjustment = 0  # Reset counter
+        else:
+            self.epochs_since_gen_adjustment += 1  # Increment counter
+
+            
+
     # Training loop
     def train(self):
         start_time = time.time()  # Record start time
@@ -80,10 +124,17 @@ class glyphix:
 
             self.current_epoch = epoch
             results=self.train_one_epoch()
+            self.loss_history.append(results) #format :{'d_loss':d_loss_total/num_batches,'g_loss':g_loss_total/num_batches,'time': total_time}
+
+           # Check for loss flatline and trigger tuning if needed
+            #loss=self.loss_flatlined()
+            #if loss:
+            #    self.adjust_learning_rate(loss)
             
             # log metrics
-            self.logger.log(f"Epoch: {epoch}, D Loss: {results['d_loss']:.4f}, G Loss: {results['g_loss']:.4f}, Time: {results['time']}",stdout=None)            
+            self.logger.log(f" Epoch: {epoch}, DLR {self.config.dis_lr}, GLR:{self.config.gen_lr}, D Loss: {results['d_loss']:.4f}, G Loss: {results['g_loss']:.4f}, Time: {results['time']}",stdout=None)            
             self.model.save_training_image(epoch)
+
         self.running=False
         end_time = time.time()  # Record end time after training completes
         total_time = end_time - start_time  # Calculate total execution time
