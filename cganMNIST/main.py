@@ -5,7 +5,7 @@ import select
 import argparse
 
 
-from .train import cgan
+from .cgan import cgan
 from .messages import generate_welcome_ascii_art, display_goodbye_message
 
 
@@ -26,7 +26,8 @@ def getch():
 
 def main():
     # Define the argument parser
-    parser = argparse.ArgumentParser(description='Train a Conditional GAN on MNIST data.')
+    parser = argparse.ArgumentParser(description='Train a Conditional GAN on MNIST or EMNST data.')
+    parser.add_argument('--model', type=str, default='MNIST', choices=['MNIST', 'EMNIST'], help='Dataset to use')
     parser.add_argument('--output-dir', type=str,  help='Directory to save all output_data')
     parser.add_argument('--workers', type=int, default=4,  help='The number of threads for dataloaders')
     parser.add_argument('--batch', type=int, default=100,  help='The batch size for the dataloader')
@@ -58,8 +59,8 @@ def main():
         dis_lr              = args.dis_lr,
         config              = args.config,
         workers             = args.workers,
-        batch_size          = args.batch
-
+        batch_size          = args.batch,
+        model_type          = args.model
     )
     # print the info after configure, because we calculate epoch start index after model load if requested
     trainer.print_info()

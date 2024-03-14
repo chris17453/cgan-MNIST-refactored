@@ -48,6 +48,7 @@ class cgan:
 
     def print_info(self):
         self.logger.log("Training Configuration:")
+        self.logger.log(f"  Model Type :              {self.config.model_type}")
         self.logger.log(f"  Output Directory:         {self.config.output_dir}")
         self.logger.log(f"  Model Directory:          {self.config.model_dir}")
         self.logger.log(f"  Image Directory:          {self.config.image_dir}")
@@ -126,7 +127,6 @@ class cgan:
                     out_real = self.model.dis_model(concat_data_dis_real)
                     loss_real = self.model.loss_fn(out_real, y_real)
                     
-                    # Discriminator fake loss
                     x_fake = self.model.gen_model(concat_data_gen_fake)
                     concat_data_dis_fake = torch.cat((one_hot, x_fake), dim=1)
                     y_fake = torch.zeros(batch_size, 1, device=self.device)
@@ -143,7 +143,6 @@ class cgan:
                 
                 self.model.optimizer_dis.zero_grad()
                 
-                # Generator loss
                 with autocast():
                     noise = torch.randn(batch_size, self.model.z_dim, device=self.device)
                     concat_data_gen = torch.cat((one_hot, noise), dim=1)

@@ -20,9 +20,14 @@ help:
 #	$(PYTHON) -m cganMNIST --epochs=200 --optimizer=adam --output-dir=adam-``
 #	--gen_model_path=models/generator_epoch_100.pth --dis_model_path=models/discriminator_epoch_100.pth 
 
-train-adam:
+minst-adam:
 	output_dir=$$(date +'%y%m%d-%H%M%S'); \
-	$(PYTHON) -m cganMNIST --workers=16 --batch=1000 --epochs=200 --dis-lr=0.0004 --gen-lr=.0002 --optimizer=adam --output-dir="outputs/adam-$$output_dir"
+	$(PYTHON) -m cganMNIST --model=MNIST --workers=16 --batch=1000 --epochs=800 --dis-lr=0.0005 --gen-lr=.0005 --optimizer=adam --output-dir="outputs/adam-$$output_dir"
+
+
+eminst-adam:
+	output_dir=$$(date +'%y%m%d-%H%M%S'); \
+	$(PYTHON) -m cganMNIST --model=EMNIST --workers=16 --batch=1000 --epochs=800 --dis-lr=0.0005 --gen-lr=.0005 --optimizer=adam --output-dir="outputs/adam-$$output_dir"
 
 train-rmsprop:
 #optimizer= 'adam', 'rmsprop', 'sgd'

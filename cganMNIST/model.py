@@ -1,15 +1,16 @@
 import os
+import math
 import torch
 import torch.nn as nn
 from torchvision.utils import make_grid
 from torchvision import transforms as T
-from torchvision.datasets import EMNIST
+from torchvision.datasets import EMNIST,MNIST
 from torch.cuda.amp import GradScaler, autocast
 from torch.utils.data import DataLoader, ConcatDataset
 from PIL import Image
 import numpy as np
 
-from .generator import Generator,Discriminator
+from .generator2 import Generator,Discriminator
 
 
 class model:
@@ -30,6 +31,7 @@ class model:
         self.scaler = None
 
         self.configure()
+        self.create_char_mapping()
 
     def weights_init(self,m):
         classname = m.__class__.__name__
@@ -40,22 +42,26 @@ class model:
             nn.init.constant_(m.bias.data, 0)
  
     def configure(self):
-        # Transform
-        #transform_data = T.Compose([
-        #    T.ToTensor(),
-        #    T.Normalize(mean=0.5, std=0.5)
-        #])
  
-        transform_data=T.Compose([
-            lambda img: T.functional.rotate(img, -90),
-            lambda img: T.functional.hflip(img),
-            T.ToTensor(),
-            T.Normalize(mean=0.5, std=0.5)
-        ])        
-
-        # Load EMNIST dataset
-        train_dataset = EMNIST(root='',split='byclass', train=True , transform=transform_data, download=True)
-        valid_dataset = EMNIST(root='',split='byclass', train=False, transform=transform_data, download=True)
+        if self.config.model_type=="MNIST":
+            # Transform
+            transform_data = T.Compose([
+                T.ToTensor(),
+                T.Normalize(mean=0.5, std=0.5)
+            ])
+            # Load MNIST dataset
+            train_dataset = MNIST(root='', train=True , transform=transform_data, download=True)
+            valid_dataset = MNIST(root='', train=False, transform=transform_data, download=True)
+        elif self.config.model_type=="EMNIST":
+            transform_data=T.Compose([
+                lambda img: T.functional.rotate(img, -90),
+                lambda img: T.functional.hflip(img),
+                T.ToTensor(),
+                T.Normalize(mean=0.5, std=0.5)
+            ])        
+            # Load EMNIST dataset
+            train_dataset = EMNIST(root='',split='byclass', train=True , transform=transform_data, download=True)
+            valid_dataset = EMNIST(root='',split='byclass', train=False, transform=transform_data, download=True)
 
         # Concat dataset
         dataset = ConcatDataset([train_dataset, valid_dataset])
@@ -69,7 +75,8 @@ class model:
         self.char_height = x.shape[2]
         self.char_width = x.shape[3]
         self.z_dim = self.char_height
-        self.num_classes_data = 62
+        self.num_classes_data= len(train_dataset.classes)
+
         self.fc_neuron = 256
 
         self.logger.log(f'Height: {self.char_height}')
@@ -77,8 +84,11 @@ class model:
         self.logger.log(f'Neuron: {self.fc_neuron}')
 
         # Initialize models
+        #self.gen_model = Generator(self.char_height,self.char_width,self.fc_neuron).to(self.device)
+        #self.dis_model = Discriminator(self.char_height,self.char_width,self.fc_neuron).to(self.device)
         self.gen_model = Generator(self.char_height,self.char_width,self.fc_neuron).to(self.device)
         self.dis_model = Discriminator(self.fc_neuron).to(self.device)
+
 
         self.gen_model.apply(self.weights_init)
         self.dis_model.apply(self.weights_init)
@@ -105,8 +115,8 @@ class model:
 
     def configure_optimizers(self):
         if self.config.optimizer == 'adam':
-            self.optimizer_gen = torch.optim.Adam(self.gen_model.parameters(), lr=self.config.gen_lr)
-            self.optimizer_dis = torch.optim.Adam(self.dis_model.parameters(), lr=self.config.dis_lr)
+            self.optimizer_gen = torch.optim.Adam(self.gen_model.parameters(), lr=self.config.gen_lr,  betas=(0.5, 0.999))
+            self.optimizer_dis = torch.optim.Adam(self.dis_model.parameters(), lr=self.config.dis_lr,  betas=(0.5, 0.999))
         elif self.config.optimizer == 'rmsprop':
             self.optimizer_gen = torch.optim.RMSprop(self.gen_model.parameters(), lr=self.config.gen_lr)
             self.optimizer_dis = torch.optim.RMSprop(self.dis_model.parameters(), lr=self.config.dis_lr)
@@ -138,7 +148,24 @@ class model:
         self.config.optimizer = checkpoint['optimizer']
         return  checkpoint['epoch']
 
-    def save_training_image(self,epoch):
+  
+    def autosize_grid(self,total_count):
+        """
+        Automatically determine the size of a square-ish grid needed to fit all items.
+        
+        Parameters:
+        - total_count: int, the total number of items to fit in the grid.
+        
+        Returns:
+        - rows: int, the number of rows in the grid.
+        - cols: int, the number of columns in the grid.
+        """
+        cols = math.ceil(math.sqrt(total_count))
+        rows = math.ceil(total_count / cols)
+        
+        return rows, cols
+    
+    def save_training_image2(self,epoch):
         # Ensure the save directory exists
         os.makedirs(self.config.image_dir, exist_ok=True)
 
@@ -156,7 +183,8 @@ class model:
                 outputs= torch.cat((output.view(bs,self.image_channel, self.char_height,self.char_width), outputs), dim=0)
 
         # display the created images
-        img_grid= make_grid(outputs, 8)
+        grid=self.optimal_dimensions(self.num_classes_data)
+        img_grid= make_grid(outputs, grid[0],grid[1])
         # Convert the tensor to [0, 255] and change order of dimensions to HxWxC
         img = img_grid.cpu().detach().numpy()
         img = (np.transpose(img, (1, 2, 0)) * 255).astype(np.uint8)
@@ -173,3 +201,90 @@ class model:
             f.write(filename + '\n')        
 
     
+    def save_training_image(self, epoch):
+        # Ensure the save directory exists
+        os.makedirs(self.config.image_dir, exist_ok=True)
+
+        # creating images of numbers one to ten
+        target_label = torch.tensor(range(self.num_classes_data))
+        image_tensors = []  # Use a list to collect image tensors
+
+        for number in target_label:
+            with torch.no_grad():
+                bs = 1
+                z_test = torch.randn(bs, self.z_dim).to(self.device)
+                target_onehot = torch.nn.functional.one_hot(number, self.num_classes_data).float().to(self.device) # Ensure it's float for compatibility
+                target_onehot = torch.unsqueeze(target_onehot, dim=0)
+                concat_target_data = torch.cat((target_onehot, z_test), dim=1)
+                output = self.gen_model(concat_target_data)
+                image_tensors.append(output.view(bs, self.image_channel, self.char_height, self.char_width))
+
+        outputs = torch.cat(image_tensors, dim=0)  # Concatenate all collected tensors
+
+        grid=self.autosize_grid(self.num_classes_data)
+        # display the created images
+        img_grid = make_grid(outputs, nrow=grid[0])
+        # Convert the tensor to [0, 255] and change order of dimensions to HxWxC
+        img = img_grid.cpu().detach().numpy()
+        img = (np.transpose(img, (1, 2, 0)) * 255).astype(np.uint8)
+
+        # Convert numpy array to PIL Image
+        img = Image.fromarray(img)
+
+        # Save the image with filename based on the epoch
+        filename = os.path.join(self.config.image_dir, f"img_{epoch}.png")
+        img.save(filename)
+
+        # Append the filename to a text file
+        with open(os.path.join(self.config.output_dir, 'images.txt'), 'a') as f:
+            f.write(filename + '\n')
+
+    def create_char_mapping(self):
+        # Create sequences for digits, uppercase, and lowercase letters
+        digits = [str(i) for i in range(10)]
+        uppercase_letters = [chr(i) for i in range(ord('A'), ord('Z')+1)]
+        lowercase_letters = [chr(i) for i in range(ord('a'), ord('z')+1)]
+
+        # Combine all sequences and map each to an index
+        all_chars = digits + uppercase_letters + lowercase_letters
+        self.char_mapping = {char: index for index, char in enumerate(all_chars)}
+
+    def write_file(self,text,x_offset, y_offset,filename):
+        os.makedirs(self.config.image_dir, exist_ok=True)
+        
+        # Background image dimensions
+        bg_width, bg_height = 1024, 512  # Example dimensions, adjust as needed
+        background_image = Image.new('RGB', (bg_width, bg_height), color = (0, 0, 0))
+
+        for char in text:
+            if char in self.char_mapping:
+                target_label = torch.tensor([self.char_mapping[char]])
+                with torch.no_grad():
+                    bs = 1
+                    z_test = torch.randn(bs, self.z_dim).to(self.device)
+                    target_onehot = torch.nn.functional.one_hot(target_label, self.num_classes_data).float().to(self.device)
+                    target_onehot = torch.unsqueeze(target_onehot, dim=0)
+                    concat_target_data = torch.cat((target_onehot, z_test), dim=1)
+                    output = self.gen_model(concat_target_data)
+                    char_image_tensor = output.view(bs, self.image_channel, self.char_height, self.char_width)
+
+                    # Convert tensor to PIL Image
+                    char_img = char_image_tensor.cpu().detach().numpy()
+                    char_img = np.transpose(char_img, (0, 2, 3, 1)).reshape(self.char_height, self.char_width, self.image_channel)
+                    char_img = (char_img * 255).astype(np.uint8)
+                    char_img_pil = Image.fromarray(char_img)
+
+                    # Paste the character image onto the background
+                    background_image.paste(char_img_pil, (x_offset, y_offset))
+
+                    # Update x_offset for the next character
+                    x_offset += self.char_width
+                    if x_offset + self.char_width > bg_width:
+                        x_offset = 0
+                        y_offset += self.char_height
+                        if y_offset + self.char_height > bg_height:
+                            break  # Stop if we run out of room
+
+        # Save the composed image
+        background_image.save(filename)
+

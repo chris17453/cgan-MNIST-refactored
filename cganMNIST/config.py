@@ -24,6 +24,7 @@ class ConfigManager:
         self.log_file = None
         self.workers = 4
         self.batch_size = 100
+        self.model_type = "MINST"
 
         # load the params into the config variable...
         for key, value in parameters.items():
