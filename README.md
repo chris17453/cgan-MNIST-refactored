@@ -38,29 +38,33 @@ pipenv install
 
 ```bash
 pipenv shell
-python -m cganMNIST -h
-usage: cganMNIST [-h] [--output_dir OUTPUT_DIR] [--save_checkpoints] [--checkpoint_interval CHECKPOINT_INTERVAL]
-                   [--gen_model_path GEN_MODEL_PATH] [--dis_model_path DIS_MODEL_PATH] [--epochs EPOCHS]
-                   [--optimizer {adam,rmsprop,sgd}] [--gen_lr GEN_LR] [--dis_lr DIS_LR] [--config CONFIG]
+usage: __main__.py [-h] [--model {MNIST,EMNIST}] [--output-dir OUTPUT_DIR] [--workers WORKERS] [--batch BATCH]
+                   [--save-checkpoints] [--checkpoint-interval CHECKPOINT_INTERVAL] [--gen_model-path GEN_MODEL_PATH]
+                   [--dis_model-path DIS_MODEL_PATH] [--epochs EPOCHS] [--optimizer {adam,rmsprop,sgd}]
+                   [--gen-lr GEN_LR] [--dis-lr DIS_LR] [--config CONFIG]
 
-Train a Conditional GAN on MNIST data.
+Train a Conditional GAN on MNIST or EMNST data.
 
 options:
   -h, --help            show this help message and exit
-  --output_dir OUTPUT_DIR
+  --model {MNIST,EMNIST}
+                        Dataset to use
+  --output-dir OUTPUT_DIR
                         Directory to save all output_data
-  --save_checkpoints    Flag to save model checkpoints.
-  --checkpoint_interval CHECKPOINT_INTERVAL
+  --workers WORKERS     The number of threads for dataloaders
+  --batch BATCH         The batch size for the dataloader
+  --save-checkpoints    Flag to save model checkpoints.
+  --checkpoint-interval CHECKPOINT_INTERVAL
                         Interval (in epochs) between saving model checkpoints.
-  --gen_model_path GEN_MODEL_PATH
+  --gen_model-path GEN_MODEL_PATH
                         Path to the pre-trained generator model to load.
-  --dis_model_path DIS_MODEL_PATH
+  --dis_model-path DIS_MODEL_PATH
                         Path to the pre-trained discriminator model to load.
   --epochs EPOCHS       Number of epochs to train the model.
   --optimizer {adam,rmsprop,sgd}
                         Optimizer for training: adam, rmsprop, or sgd.
-  --gen_lr GEN_LR       Learning rate for the generator.
-  --dis_lr DIS_LR       Learning rate for the discriminator.
+  --gen-lr GEN_LR       Learning rate for the generator.
+  --dis-lr DIS_LR       Learning rate for the discriminator.
   --config CONFIG       Path to a YAML configuration file.
 
 

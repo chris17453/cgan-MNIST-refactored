@@ -11,6 +11,7 @@ numpy = "*"
 pyyaml = "*"
 pyfiglet = "*"
 alive-progress = "*"
+opencv-python = "*"
 
 [dev-packages]
 
