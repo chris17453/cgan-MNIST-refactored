@@ -6,7 +6,7 @@ output/*
 outputs/*
 MINST
 EMNIST
-*.PNG
-*.png
+output*/*.PNG
+output*/*.png
 *.pt
 outputs-done
