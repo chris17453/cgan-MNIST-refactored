@@ -84,7 +84,7 @@ There is a gif maker script in the root of the project.
 
 ![Compiled Output](assets/output.gif)
 
-![Compiled Output](assets/emnist-output.gif)
+![Compiled Output](assets/emnist-output2.gif)
 
 
 ## Cli action
