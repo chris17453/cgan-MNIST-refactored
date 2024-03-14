@@ -1,4 +1,4 @@
-# CGAN_MNIST
+# glyphix
 
 I embarked on this project over the weekend, inspired by the remarkable code shared by Amir Hossein Fouladi. My goal was to adapt it for command line application, showcasing a typical example of my collaboration with data scientists. I've refined and enhanced it significantly, yet the foundational code is a testament to Amir's original work. My sincere thanks to Amir!
 
