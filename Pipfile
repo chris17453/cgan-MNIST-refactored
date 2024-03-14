@@ -12,6 +12,7 @@ pyyaml = "*"
 pyfiglet = "*"
 alive-progress = "*"
 opencv-python = "*"
+tqdm = "*"
 
 [dev-packages]
 

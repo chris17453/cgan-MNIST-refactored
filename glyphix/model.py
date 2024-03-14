@@ -15,7 +15,7 @@ import cv2
 
 
 from .generator import Generator,Discriminator
-from .dataset import CustomTransform
+from .dataset import PrecomputeDataset
 
 
 
@@ -50,8 +50,8 @@ class model:
  
     def configure(self):
  
-        custom_transform = CustomTransform(model_type=self.config.model_type)
-        train_dataset, valid_dataset = custom_transform.load_datasets()
+        precomputed_data = PrecomputeDataset(root_dir="data",model_type=self.config.model_type)
+        train_dataset, valid_dataset = precomputed_data.load()
 
         # Concat dataset
         dataset = ConcatDataset([train_dataset, valid_dataset])
@@ -172,10 +172,10 @@ class model:
                 target_onehot = torch.unsqueeze(target_onehot, dim=0)
                 concat_target_data = torch.cat((target_onehot, z_test), dim=1)
                 output = self.gen_model(concat_target_data)
+                output = output * 0.5 + 0.5  # Assuming normalization was mean=0.5, std=0.5
                 image_tensors.append(output.view(bs, self.image_channel, self.char_height, self.char_width))
 
         outputs = torch.cat(image_tensors, dim=0)  # Concatenate all collected tensors
-        outputs = outputs * 0.5 + 0.5  # Assuming normalization was mean=0.5, std=0.5
 
         grid=self.autosize_grid(self.num_classes_data)
         # display the created images

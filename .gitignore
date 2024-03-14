@@ -8,3 +8,5 @@ MINST
 EMNIST
 *.PNG
 *.png
+*.pt
+outputs-done
