@@ -100,6 +100,8 @@ The original source code for the Jupyter notebook
 
 - Author: Amir Hossein Fouladi
 - [Original Repository](https://github.com/Amir-Hofo/CGAN_MNIST_Pytorch/tree/main)
+- [MNIST Data](https://www.kaggle.com/datasets/hojjatk/mnist-dataset)
+- [EMNIST Data](https://www.nist.gov/itl/products-and-services/emnist-dataset)
 
 ## Thanks for all the project that I've used to get me here
 
