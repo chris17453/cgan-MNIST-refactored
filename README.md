@@ -90,7 +90,7 @@ There is a gif maker script in the root of the project.
 
 ![EMNIST Text](assets/emnist-text.png)
 
-## Sample data
+## Sample training data  (not from the model)
 
 ![EMNIST ](assets/emnist-sample.png)
 
