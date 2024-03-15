@@ -21,6 +21,7 @@ This project aims to showcase the transformation of a Jupyter notebook into an e
 - **Multiple Optimizers**: Integration of different optimizers to enhance model performance (ongoing development).
 - **CLI Ascii Art**: Snazzy TAAG Ascii art for an enhanced command line interface experience.
 - **GIF Generation**: Handy tool for creating GIFs to visualize training progression.
+- **FONT Writer**: use the generated fonr to write text onto an image
 aker
 
 ## Thoughts
