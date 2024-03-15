@@ -90,6 +90,7 @@ There is a gif maker script in the root of the project.
 ## Created from EMNIST trained model
 
 ![EMNIST Text](assets/emnist-text.png)
+![EMNIST Text](assets/text/output.gif)
 
 ## Sample training data  (not from the model)
 
