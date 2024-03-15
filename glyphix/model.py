@@ -16,14 +16,20 @@ import cv2
 
 from .generator import Generator,Discriminator
 from .dataset import PrecomputeDataset
-
-
+from .logger import Logger
+from .common import print_info
 
     
 class model:
-    def __init__(self,config,logger,device):
+    def __init__(self,config,logger=None,device=None):
         self.device=device
+        if self.device==None:
+            self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
         self.logger=logger
+        if self.logger==None:
+            self.logger=Logger(filepath=None,stdout=True)
+
         self.config=config
         self.optimizer_gen = None
         self.optimizer_dis = None
@@ -37,8 +43,8 @@ class model:
         self.loss_fn = None
         self.scaler = None
 
+
         self.configure()
-        self.create_char_mapping()
 
     def weights_init(self,m):
         classname = m.__class__.__name__
@@ -49,59 +55,54 @@ class model:
             nn.init.constant_(m.bias.data, 0)
  
     def configure(self):
- 
-        precomputed_data = PrecomputeDataset(root_dir="data",model_type=self.config.model_type)
-        train_dataset, valid_dataset = precomputed_data.load()
+        self.char_height=28
+        self.char_width=28
+        self.fc_neuron=256
+        if self.config.train:
+            self.logger.log("Loading Training Model")
+            precomputed_data = PrecomputeDataset(root_dir="data",model_type=self.config.model_type)
+            train_dataset, valid_dataset = precomputed_data.load()
 
-        # Concat dataset
-        dataset = ConcatDataset([train_dataset, valid_dataset])
+            # Concat dataset
+            #train_dataset , valid_dataset
+            dataset = ConcatDataset([ train_dataset,valid_dataset])
 
-        # DataLoader
-        self.data_loader = DataLoader(dataset, batch_size=self.config.batch_size, shuffle=True, 
-                                      num_workers=self.config.workers, pin_memory=True)
+            # DataLoader
+            self.data_loader = DataLoader(dataset, batch_size=self.config.batch_size, shuffle=True, 
+                                        num_workers=self.config.workers, pin_memory=True)
 
-        x, _ = next(iter(self.data_loader))
-        self.image_channel= x.shape[1] 
-        self.char_height = x.shape[2]
-        self.char_width = x.shape[3]
-        self.z_dim = self.char_height
-        self.num_classes_data= len(train_dataset.classes)
+            x, _ = next(iter(self.data_loader))
+            self.image_channel= x.shape[1] 
+            self.char_height = x.shape[2]
+            self.char_width = x.shape[3]
+            self.z_dim = self.char_height
+            self.num_classes_data= len(train_dataset.classes)
 
-        self.fc_neuron = 256
-
-        self.logger.log(f'Height: {self.char_height}')
-        self.logger.log(f'Width: {self.char_width}')
-        self.logger.log(f'Neuron: {self.fc_neuron}')
-
+            self.fc_neuron = 256
+            self.save_fake_data()
+            self.create_char_mapping()
+        
         # Initialize models
-        #self.gen_model = Generator(self.char_height,self.char_width,self.fc_neuron).to(self.device)
-        #self.dis_model = Discriminator(self.char_height,self.char_width,self.fc_neuron).to(self.device)
         self.gen_model = Generator(self.char_height,self.char_width,self.fc_neuron).to(self.device)
         self.dis_model = Discriminator(self.fc_neuron).to(self.device)
 
-
         self.gen_model.apply(self.weights_init)
         self.dis_model.apply(self.weights_init)
-
-        
         self.configure_optimizers()
         
-        # Load pre-trained models if paths are provided, but only if both paths are provided
-        if self.config.gen_model_path is not None and self.config.dis_model_path is not None: 
-            self.logger.log("Loading Models")
-            try:
-                self.config.start_epoch=self.load_checkpoint(self.config.model_path)
-            except Exception as ex:
-                self.logger.log(ex)
-                self.logger.log("Error loading models")
-                exit(code=1)
-        elif self.config.gen_model_path is not None or self.config.dis_model_path is not None: 
-            self.start_epoch = 0
-            self.logger.log("You need to give both model paths to load a model set")
-
+        if self.config.model_path is not None: 
+                self.logger.log("Loading Models")
+                try:
+                    self.config.start_epoch=self.load(self.config.model_path)
+                except Exception as ex:
+                    self.logger.log(ex)
+                    self.logger.log("Error loading models")
+                    exit(code=1)            
+        
         self.loss_fn = nn.BCEWithLogitsLoss().to(self.device)  
         self.scaler = GradScaler()
-        self.save_fake_data()
+        
+
 
     def configure_optimizers(self):
         if self.config.optimizer == 'adam':
@@ -114,20 +115,26 @@ class model:
             self.optimizer_gen = torch.optim.SGD(self.gen_model.parameters(), lr=self.config.gen_lr, momentum=0.9)
             self.optimizer_dis = torch.optim.SGD(self.dis_model.parameters(), lr=self.config.dis_lr, momentum=0.9)
     
-    def save(self, filename):
-        self.logger.log(f"Saving epoch {self.current_epoch} Checkpoint: {filename}")
+    def save(self, filename,epoch):
+        self.logger.log(f"Saving epoch {epoch} Checkpoint: {filename}")
         torch.save({
-            'epoch': self.current_epoch,
+            'epoch': epoch,
             'gen_model_state_dict': self.gen_model.state_dict(),
             'gen_optimizer_state_dict': self.optimizer_gen.state_dict(),
             'dis_model_state_dict': self.dis_model.state_dict(),
             'dis_optimizer_state_dict': self.optimizer_dis.state_dict(),
-            'optimizer': self.config.optimizer  
+            'optimizer': self.config.optimizer,
+            'image_channel' : self.image_channel,
+            'char_height' : self.char_height,
+            'char_width' : self.char_width,
+            'z_dim' : self.z_dim,
+            'model_type' : self.config.model_type,
+            'num_classes_data':self.num_classes_data
         }, filename)
 
-    def load(self,filename, logger=None):
-        if logger:
-            logger.log(f"Loading checkpoint from: {filename}")
+
+    def load(self,filename):
+        self.logger.log(f"Loading checkpoint from: {filename}")
 
         checkpoint = torch.load(filename)
 
@@ -136,6 +143,19 @@ class model:
         self.dis_model.load_state_dict(checkpoint['dis_model_state_dict'])
         self.optimizer_dis.load_state_dict(checkpoint['dis_optimizer_state_dict'])
         self.config.optimizer = checkpoint['optimizer']
+        self.image_channel = checkpoint['image_channel']
+        self.char_height = checkpoint['char_height']
+        self.char_width = checkpoint['char_width']
+        self.z_dim = checkpoint['z_dim']
+        self.config.model_type = checkpoint['model_type']
+        self.num_classes_data=checkpoint['num_classes_data']
+        #print(checkpoint)
+        print_info(self.config)
+        self.create_char_mapping()
+
+        
+        
+
         return  checkpoint['epoch']
 
   
@@ -226,45 +246,9 @@ class model:
         lowercase_letters = [chr(i) for i in range(ord('a'), ord('z')+1)]
 
         # Combine all sequences and map each to an index
-        all_chars = digits + uppercase_letters + lowercase_letters
+        if self.config.model_type=="MNIST":
+            all_chars = digits
+        elif self.config.model_type=="EMNIST":
+            all_chars = digits + uppercase_letters + lowercase_letters
+
         self.char_mapping = {char: index for index, char in enumerate(all_chars)}
-
-    def write_file(self,text,x_offset, y_offset,filename):
-        os.makedirs(self.config.image_dir, exist_ok=True)
-        
-        # Background image dimensions
-        bg_width, bg_height = 1024, 512  # Example dimensions, adjust as needed
-        background_image = Image.new('RGB', (bg_width, bg_height), color = (0, 0, 0))
-
-        for char in text:
-            if char in self.char_mapping:
-                target_label = torch.tensor([self.char_mapping[char]])
-                with torch.no_grad():
-                    bs = 1
-                    z_test = torch.randn(bs, self.z_dim).to(self.device)
-                    target_onehot = torch.nn.functional.one_hot(target_label, self.num_classes_data).float().to(self.device)
-                    target_onehot = torch.unsqueeze(target_onehot, dim=0)
-                    concat_target_data = torch.cat((target_onehot, z_test), dim=1)
-                    output = self.gen_model(concat_target_data)
-                    char_image_tensor = output.view(bs, self.image_channel, self.char_height, self.char_width)
-
-                    # Convert tensor to PIL Image
-                    char_img = char_image_tensor.cpu().detach().numpy()
-                    char_img = np.transpose(char_img, (0, 2, 3, 1)).reshape(self.char_height, self.char_width, self.image_channel)
-                    char_img = (char_img * 255).astype(np.uint8)
-                    char_img_pil = Image.fromarray(char_img)
-
-                    # Paste the character image onto the background
-                    background_image.paste(char_img_pil, (x_offset, y_offset))
-
-                    # Update x_offset for the next character
-                    x_offset += self.char_width
-                    if x_offset + self.char_width > bg_width:
-                        x_offset = 0
-                        y_offset += self.char_height
-                        if y_offset + self.char_height > bg_height:
-                            break  # Stop if we run out of room
-
-        # Save the composed image
-        background_image.save(filename)
-

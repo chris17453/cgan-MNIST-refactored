@@ -16,20 +16,21 @@ class ConfigManager:
         self.optimizer  = 'adam'
         self.save_checkpoints = None
         self.checkpoint_interval = None
-        self.gen_lr = None
-        self.dis_lr = None
+        self.gen_lr = .002
+        self.dis_lr = .002
         self.epochs = None
-        self.gen_model_path = None
-        self.dis_model_path = None
+        self.model_path = None
         self.log_file = None
         self.workers = 4
         self.batch_size = 100
-        self.model_type = "MINST"
+        self.model_type = "MNIST"
+        self.training_images= None
+        self.train = None
 
         # load the params into the config variable...
         for key, value in parameters.items():
             setattr(self, key, value)
-        
+        self.print_info()
  
     def print_info(self):
         print("Current Configuration:")
@@ -69,8 +70,8 @@ class ConfigManager:
         self.gen_lr = self.get('gen_lr')
         self.dis_lr = self.get('dis_lr')
         self.epochs = self.get('epochs')
-        self.gen_model_path = self.get('gen_model_path')
-        self.dis_model_path = self.get('dis_model_path')
+        self.model_path = self.get('model_path')
+        self.model_type = self.get('model_type')
 
     def save(self):
         # Update the 'updated' attribute with the current time

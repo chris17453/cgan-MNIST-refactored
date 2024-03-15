@@ -90,6 +90,8 @@ There is a gif maker script in the root of the project.
 
 ![EMNIST ](assets/emnist-sample.png)
 
+![EMNIST Text](assets/emnist-text.png)
+
 ## Cli action
 
 ![CLI](assets/cli.gif)

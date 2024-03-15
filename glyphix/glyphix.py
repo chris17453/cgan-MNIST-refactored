@@ -19,7 +19,8 @@ class glyphix:
         self.start_epoch = 0
         self.loss_history=[]
         self.epochs_since_dis_adjustment = 0
-        self.epochs_since_gen_adjustment = 0        
+        self.epochs_since_gen_adjustment = 0      
+        self.current_epoch = 0   
 
         self.config=ConfigManager(kwargs)
         self.config.load_or_save()
@@ -42,7 +43,7 @@ class glyphix:
             
     def save(self):
         self.logger.log("Saving Checkpopint")
-        self.model.save( os.path.join(self.config.model_dir, f"cgan_epoch_{self.current_epoch}.pth"))
+        self.model.save( os.path.join(self.config.model_dir, f"{self.config.model_type}_epoch_{self.current_epoch}.pth"),self.current_epoch)
 
     def print_info(self):
         self.logger.log("Training Configuration:")
@@ -53,17 +54,19 @@ class glyphix:
         self.logger.log(f"  Save Checkpoints:         {'Yes' if self.config.save_checkpoints else 'No'}")
         self.logger.log(f"  Workers:                  {self.config.workers}")
         self.logger.log(f"  Batch:                    {self.config.batch_size}")
-        self.logger.log(f"  Device:                    {self.model.device}")
+        self.logger.log(f"  Device:                   {self.model.device}")
         
         if self.config.save_checkpoints:
             self.logger.log(f"  Checkpoint Interval:      {self.config.checkpoint_interval}")
+        if self.config.training_images:
+            self.logger.log(f"  Training Images Interval:      {self.config.training_images}")
+
         self.logger.log(f"  Optimizer:                {self.config.optimizer}")
         self.logger.log(f"  Gen LR:                   {self.config.gen_lr}")
         self.logger.log(f"  Dis LR:                   {self.config.dis_lr}")
 
-        if self.config.gen_model_path is not None and self.config.dis_model_path is not None: 
-            self.logger.log(f"  Generator Model Path:     {self.config.gen_model_path if self.config.gen_model_path else 'Not provided'}")
-            self.logger.log(f"  Discriminator Model Path: {self.config.dis_model_path if self.config.dis_model_path else 'Not provided'}")
+        if self.config.model_path is not None: 
+            self.logger.log(f"   Model Path:              {self.config.model_path}")
             self.logger.log(f"  Starting Epoch:           {self.start_epoch}")
             
         self.logger.log(f"  Epochs:                   {self.config.epochs}")
@@ -113,16 +116,8 @@ class glyphix:
     def train(self):
         start_time = time.time()  # Record start time
         for epoch in range(self.start_epoch, self.config.epochs):
-            if self.running!=True:
-                return
-            if self.save_requested:
-                self.save_requested=None
-                self.save()
-            elif self.config.save_checkpoints and \
-                 (epoch % self.config.checkpoint_interval == 0 or epoch == self.config.epochs - 1):
-                self.save()
-
             self.current_epoch = epoch
+        
             results=self.train_one_epoch()
             self.loss_history.append(results) #format :{'d_loss':d_loss_total/num_batches,'g_loss':g_loss_total/num_batches,'time': total_time}
 
@@ -133,7 +128,24 @@ class glyphix:
             
             # log metrics
             self.logger.log(f" Epoch: {epoch}, DLR {self.config.dis_lr}, GLR:{self.config.gen_lr}, D Loss: {results['d_loss']:.4f}, G Loss: {results['g_loss']:.4f}, Time: {results['time']}",stdout=None)            
-            self.model.save_training_image(epoch)
+
+            if self.config.training_images and  (epoch % self.config.training_images == 0):
+                self.model.save_training_image(epoch)
+
+#    print(epoch,self.config.epochs)
+            if self.running!=True:
+                return
+            if self.save_requested:
+                self.save_requested=None
+                self.save()
+            # checkpoints enabeled.. save intermittantly
+            elif self.config.checkpoint_interval and \
+                 epoch % self.config.checkpoint_interval == 0 and epoch != 0:
+                self.save()
+            # last run SAVE model
+            elif epoch == self.config.epochs - 1:
+                self.save()
+
 
         self.running=False
         end_time = time.time()  # Record end time after training completes

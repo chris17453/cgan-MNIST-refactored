@@ -4,6 +4,8 @@ __pycache__
 */annotated_images*
 output/*
 outputs/*
+output-old
+output-done
 MINST
 EMNIST
 output*/*.PNG

@@ -33,7 +33,7 @@ class PrecomputeDataset:
         if self.model_type == "MNIST":
             return T.Compose([
 #                CLAHETransform(),
-                HistogramEqualizationTransform(),
+                #HistogramEqualizationTransform(),
                 T.ToTensor(),
                 T.Normalize(mean=0.5, std=0.5)
             ])
@@ -41,7 +41,7 @@ class PrecomputeDataset:
             return T.Compose([
                 lambda img: T.functional.rotate(img, -90),
                 lambda img: T.functional.hflip(img),
-                HistogramEqualizationTransform(),
+                #HistogramEqualizationTransform(),
                 T.ToTensor(),
                 T.Normalize(mean=0.5, std=0.5)
             ])
@@ -84,8 +84,10 @@ class PrecomputeDataset:
         subset_name = 'train' if train else 'valid'
         filepath = os.path.join(self.root_dir, f"{self.model_type.lower()}_{subset_name}_preprocessed.pt")
         if os.path.exists(filepath):
+            print ("Loading Pre computed Dataset")
             return PrecomputedDataset(filepath)
         else:
+            print ("Building Pre computed Dataset")
             self.preprocess_and_save()
             if os.path.exists(filepath):
                 return PrecomputedDataset(filepath)

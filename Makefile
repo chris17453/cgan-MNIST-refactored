@@ -20,14 +20,34 @@ help:
 #	$(PYTHON) -m glyphix --epochs=200 --optimizer=adam --output-dir=adam-``
 #	--gen_model_path=models/generator_epoch_100.pth --dis_model_path=models/discriminator_epoch_100.pth 
 
+minst-text:
+	$(PYTHON) -m glyphix \
+		create-image \
+		--text="999 8675309" \
+		--width=800 \
+		--height=100 \
+		--output=assets/mnist-text.png \
+		--model-path=outputs/emnist/240314-204122/models/EMNIST_epoch_300.pth
+		
+#		$outputs/mnist/240314-204342/models/MNIST_epoch_542.pth
+
+eminst-text:
+	$(PYTHON) -m glyphix \
+		create-image \
+		--text="1324567890 Life is just. Work that is well done is its own reward." \
+		--width=800 \
+		--height=100 \
+		--output=assets/emnist-text.png \
+		--model-path=outputs/emnist/240314-210720/models/EMNIST_epoch_799.pth
+
 minst-adam:
 	output_dir=$$(date +'%y%m%d-%H%M%S'); \
-	$(PYTHON) -m glyphix --model=MNIST --workers=4 --batch=1000 --epochs=800 --dis-lr=.0001 --gen-lr=.0004 --optimizer=adam --output-dir="outputs/adam-$$output_dir"
+	$(PYTHON) -m glyphix train --checkpoint=100 --training-image=1 --model=MNIST --workers=4 --batch=1000 --epochs=800 --dis-lr=.0001 --gen-lr=.0004 --optimizer=adam --output-dir="outputs/mnist/$$output_dir"
 
 
 eminst-adam:
 	output_dir=$$(date +'%y%m%d-%H%M%S'); \
-	$(PYTHON) -m glyphix --model=EMNIST --workers=16 --batch=1000 --epochs=800 --dis-lr=0.0005 --gen-lr=.0005 --optimizer=adam --output-dir="outputs/adam-$$output_dir"
+	$(PYTHON) -m glyphix train --checkpoint=100 --training-image=1 --model=EMNIST --workers=20 --batch=1000 --epochs=800 --dis-lr=.0001 --gen-lr=.0004 --optimizer=adam --checkpoint=100 --output-dir="outputs/emnist/$$output_dir"
 
 train-rmsprop:
 #optimizer= 'adam', 'rmsprop', 'sgd'
