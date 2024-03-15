@@ -86,11 +86,13 @@ There is a gif maker script in the root of the project.
 
 ![Compiled Output](assets/emnist-output2.gif)
 
+## Created from EMNIST trained model
+
+![EMNIST Text](assets/emnist-text.png)
+
 ## Sample data
 
 ![EMNIST ](assets/emnist-sample.png)
-
-![EMNIST Text](assets/emnist-text.png)
 
 ## Cli action
 
