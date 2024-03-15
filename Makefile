@@ -27,18 +27,24 @@ minst-text:
 		--width=800 \
 		--height=100 \
 		--output=assets/mnist-text.png \
-		--model-path=outputs/emnist/240314-204122/models/EMNIST_epoch_300.pth
+		--model-path=outputs/emnist/240314-210720/models/EMNIST_epoch_799.pth
+#		outputs/emnist/240314-204122/models/EMNIST_epoch_300.pth
 		
 #		$outputs/mnist/240314-204342/models/MNIST_epoch_542.pth
 
 eminst-text:
 	$(PYTHON) -m glyphix \
 		create-image \
-		--text="1324567890 Life is just. Work that is well done is its own reward." \
+		--text="Life is just. Work that is well done is its own reward. 1234567890 " \
 		--width=800 \
 		--height=100 \
-		--output=assets/emnist-text.png \
-		--model-path=outputs/emnist/240314-210720/models/EMNIST_epoch_799.pth
+		--output=assets/text/img.png \
+		--model-path=outputs/emnist/240314-204122/models/EMNIST_epoch_799.pth
+	./gif.sh assets/text/images.txt 21
+
+
+# FAT UGLY
+#		outputs/emnist/240314-210720/models/EMNIST_epoch_799.pth 
 
 minst-adam:
 	output_dir=$$(date +'%y%m%d-%H%M%S'); \

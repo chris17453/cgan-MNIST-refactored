@@ -4,6 +4,10 @@ files=$1
 num_images=$2
 base_dir=$(dirname "$files")
 
+if [ -z "$num_images" ]; then
+    num_images=1
+fi
+
 # Check if files.txt exists
 if [ ! -f "$files" ]; then
     echo "Error: files.txt not found"

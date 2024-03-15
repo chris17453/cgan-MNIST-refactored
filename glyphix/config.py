@@ -26,6 +26,7 @@ class ConfigManager:
         self.model_type = "MNIST"
         self.training_images= None
         self.train = None
+        self.neurons = 256
 
         # load the params into the config variable...
         for key, value in parameters.items():
@@ -72,6 +73,10 @@ class ConfigManager:
         self.epochs = self.get('epochs')
         self.model_path = self.get('model_path')
         self.model_type = self.get('model_type')
+        try:
+            self.neurons    = self.get('neurons')
+        except:
+            pass
 
     def save(self):
         # Update the 'updated' attribute with the current time

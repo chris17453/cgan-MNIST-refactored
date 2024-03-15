@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class Generator(nn.Module):
-    def __init__(self,h,w,fc_neuron):
+    def __init__(self,h,w,fc_neuron,num_classes=None):
         super().__init__()
         self.h=h
         self.w=w

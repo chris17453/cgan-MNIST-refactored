@@ -13,8 +13,9 @@ import numpy as np
 from PIL import ImageFilter, Image
 import cv2
 
-
-from .generator import Generator,Discriminator
+# for testing different generators
+from .generators.generator import Generator,Discriminator
+#from .generators.generator1 import Generator,Discriminator
 from .dataset import PrecomputeDataset
 from .logger import Logger
 from .common import print_info
@@ -57,7 +58,7 @@ class model:
     def configure(self):
         self.char_height=28
         self.char_width=28
-        self.fc_neuron=256
+        self.fc_neuron=self.config.neurons
         if self.config.train:
             self.logger.log("Loading Training Model")
             precomputed_data = PrecomputeDataset(root_dir="data",model_type=self.config.model_type)
@@ -78,7 +79,7 @@ class model:
             self.z_dim = self.char_height
             self.num_classes_data= len(train_dataset.classes)
 
-            self.fc_neuron = 256
+            self.fc_neuron = self.config.neurons
             self.save_fake_data()
             self.create_char_mapping()
         
@@ -129,7 +130,8 @@ class model:
             'char_width' : self.char_width,
             'z_dim' : self.z_dim,
             'model_type' : self.config.model_type,
-            'num_classes_data':self.num_classes_data
+            'num_classes_data':self.num_classes_data,
+            'neurons': self.neurons
         }, filename)
 
 
@@ -149,6 +151,10 @@ class model:
         self.z_dim = checkpoint['z_dim']
         self.config.model_type = checkpoint['model_type']
         self.num_classes_data=checkpoint['num_classes_data']
+        try:
+            self.neurons=checkpoint['neurons']
+        except:
+            pass
         #print(checkpoint)
         print_info(self.config)
         self.create_char_mapping()

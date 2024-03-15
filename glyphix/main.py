@@ -42,6 +42,7 @@ def train(args):
         batch_size          = args.batch,
         model_type          = args.model,
         training_images     = args.training_images,
+        neurons             = args.neurons,
         train               = True
     )
     # print the info after configure, because we calculate epoch start index after model load if requested
@@ -82,7 +83,7 @@ def create_image(args):
                 width       = args.width,
                 height      = args.height,
                 filename    = args.output )
-    gr.write_text(text=args.text,x_offset=args.x,y_offset=args.y)
+    gr.write_text_loop(text=args.text,x_offset=args.x,y_offset=args.y)
     gr.save()
 
 
@@ -105,6 +106,7 @@ def main():
     train_parser.add_argument('--gen-lr', type=float, default=0.0002, help='Learning rate for the generator.')
     train_parser.add_argument('--dis-lr', type=float, default=0.0002, help='Learning rate for the discriminator.')
     train_parser.add_argument('--config', type=str, help='Path to a YAML configuration file.')
+    train_parser.add_argument('--neurons', type=int, default=256, help='Number of neurons')
     train_parser.add_argument('--training-images', type=int, help='Interval to save training images.')
 
     # Subparser for the "create-image" command
